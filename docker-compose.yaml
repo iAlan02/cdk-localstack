@@ -1,0 +1,31 @@
+services:
+  localstack:
+    image: localstack/localstack:latest
+    ports:
+      - "127.0.0.1:4510-4559:4510-4559"
+      - "127.0.0.1:4566:4566"
+      - "127.0.0.1:4571:4571"
+    environment:
+      # added cloudformation + sts + cloudwatch for better CDK/CFN compatibility
+      - SERVICES=cloudformation,sts,cloudwatch,s3,lambda,apigateway,iam,ssm,logs
+      - LAMBDA_EXECUTOR=docker_reuse
+      - DOCKER_HOST=unix:///var/run/docker.sock
+      - DEFAULT_REGION=eu-west-1
+      - DEBUG=1
+      - DATA_DIR=/var/lib/localstack/data
+      - PORT_WEB_UI=8080
+      - LAMBDA_DOCKER_NETWORK=localstack-lambda-net
+      - HOSTNAME_EXTERNAL=localhost
+      - EDGE_PORT=4566
+    volumes:
+      - localstack_data:/var/lib/localstack
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    privileged: true
+    restart: unless-stopped
+
+volumes:
+  localstack_data:
+
+networks:
+  default:
+    name: localstack-lambda-net
